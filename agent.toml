@@ -1,0 +1,6 @@
+version = "1.0"
+model = "claude-4-opus"
+
+import = [
+"agents/pre_commit_check.toml"
+]

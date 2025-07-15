@@ -1,0 +1,165 @@
+# Pre-commit Check Agent Configuration
+# This agent performs various checks before allowing commits to the repository
+
+[agent]
+name = "pre-commit-check"
+description = "Automated pre-commit checks for the 2D Game project"
+version = "1.0.0"
+
+[instructions]
+# General instructions for the pre-commit agent
+general = """
+This agent should run automatically before each commit to ensure code quality and consistency.
+All checks must pass before the commit is allowed to proceed.
+If any check fails, provide clear feedback about what needs to be fixed.
+"""
+
+# Code quality checks
+code_quality = """
+1. Check for compilation errors in all Java files
+2. Ensure no syntax errors are present
+3. Verify that all imports are used and necessary
+4. Check for TODO or FIXME comments that should be addressed
+5. Ensure no debugging print statements are left in the code
+"""
+
+# Code style and formatting
+formatting = """
+1. Verify consistent indentation (4 spaces for Java)
+2. Check for proper bracket placement following Java conventions
+3. Ensure proper spacing around operators and keywords
+4. Verify line length doesn't exceed 120 characters
+5. Check for trailing whitespace
+6. Ensure files end with a newline character
+"""
+
+# Documentation checks
+documentation = """
+1. Verify all public classes have Javadoc comments
+2. Check that all public methods have proper documentation
+3. Ensure complex algorithms have explanatory comments
+4. Verify README is up to date if changes affect usage
+5. Check that any new features are documented
+"""
+
+# Security and best practices
+security = """
+1. Check for hardcoded passwords or API keys
+2. Verify no sensitive information in comments
+3. Ensure proper exception handling
+4. Check for potential null pointer exceptions
+5. Verify resource cleanup (file handles, connections)
+"""
+
+# Game-specific checks
+game_specific = """
+1. Verify all game assets referenced in code exist in /res directory
+2. Check that sprite sheets are properly loaded
+3. Ensure game loop maintains consistent frame rate
+4. Verify collision detection boundaries are properly set
+5. Check that all entity classes extend appropriate base classes
+"""
+
+# Testing requirements
+testing = """
+1. Ensure unit tests exist for new functionality
+2. Verify all existing tests still pass
+3. Check test coverage doesn't decrease
+4. Ensure integration tests for game mechanics
+5. Verify performance tests for critical game loops
+"""
+
+# File organization
+file_organization = """
+1. Ensure new files are in appropriate packages
+2. Verify naming conventions are followed (CamelCase for classes)
+3. Check that resources are organized by type (sprites, sounds, etc.)
+4. Ensure configuration files are in proper directories
+5. Verify no temporary files are being committed
+"""
+
+[hooks]
+# Define the actual hooks to run
+pre_commit = [
+    "compile_check",
+    "style_check",
+    "security_scan",
+    "test_runner",
+    "asset_validator"
+]
+
+[checks]
+# Specific check configurations
+compile_check = {
+    enabled = true,
+    command = "javac -d out src/**/*.java",
+    fail_on_error = true
+}
+
+style_check = {
+    enabled = true,
+    patterns = ["*.java"],
+    rules = [
+        "no-trailing-whitespace",
+        "end-with-newline",
+        "consistent-indentation",
+        "max-line-length-120"
+    ]
+}
+
+security_scan = {
+    enabled = true,
+    patterns = [
+        "password",
+        "api_key",
+        "secret",
+        "token",
+        "credential"
+    ],
+    exclude_paths = [".git", "out", ".idea"]
+}
+
+test_runner = {
+    enabled = true,
+    command = "java -cp out:lib/* org.junit.runner.JUnitCore",
+    minimum_coverage = 70
+}
+
+asset_validator = {
+    enabled = true,
+    asset_directory = "res",
+    validate_references = true,
+    check_formats = ["png", "jpg", "wav", "mp3"]
+}
+
+[reporting]
+# How to report results
+format = "detailed"
+show_warnings = true
+show_suggestions = true
+fail_fast = false  # Run all checks even if one fails
+
+[exclusions]
+# Files and patterns to exclude from checks
+ignore_paths = [
+    ".git/**",
+    ".idea/**",
+    "out/**",
+    "*.class",
+    "*.jar",
+    ".DS_Store",
+    "Thumbs.db"
+]
+
+ignore_files = [
+    "module-info.java",  # Module declarations have different rules
+    "*Test.java",        # Test files may have different standards
+    "*Mock.java"         # Mock objects may violate some rules
+]
+
+[notifications]
+# Notification settings
+on_success = "✅ All pre-commit checks passed!"
+on_failure = "❌ Pre-commit checks failed. Please fix the issues before committing."
+show_duration = true
+show_summary = true
